@@ -1,7 +1,7 @@
 Bitcoin
 =======
 
-Bitcoin Prices and Converter
+Bitcoin Prices and Converter Web App
 
 Stylized with Bootstrap v3.1.1
 

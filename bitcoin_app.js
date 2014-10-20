@@ -13,11 +13,6 @@ var bitcoinDisplayTemplate = function(symbol1, symbol2, holder) {
     $("#dollarInput[placeholder]").attr("placeholder", holder);
 
     // Find difference between current price and 24-hour average
-    // The anonymous callback calculates the difference between the current price and the 24-hour average
-    // Then the anonymous callback adds the difference to the display using jQuery
-    // When this function is executed, the array (dayAverage) will only have one item based on the nature of my program
-    // Normally map is used to transform each item in an array and then push the new values to a new array
-    // However, even though I am only transforming one item I wanted to practice using this method in my program
     dayAverage.map(function(){
       difference = currentPrice-dayAverage;
       if(difference===0)
@@ -74,10 +69,7 @@ var getCurrentPrice = function(callback) {
   else {
     url = "https://api.bitcoinaverage.com/ticker/USD/";
   }
-  // getJSON asynchronously fetches data from the api supplied in url variable
-  // It uses an anonymous function once the GET HTTP request is successful
-  // The anonymous function gets values and pushes them to currentPrice, ask, bid, and dayAverage
-  // Then the callback (bitcoinDisplay) function executes 
+
   $.getJSON(url, function (bcInfo) {
     currentPrice.splice(0,1,bcInfo.last);
     ask.splice(0,1,bcInfo.ask);
@@ -120,36 +112,6 @@ var dollarConvert = function(dollarValue, currentPrice) {
   }
 };
 
-
-// Although this is not the best use of callbacks...
-// I wanted to leave this commented code here to show an example of a callback
-// It is a slight variation of the previous two functions above
-// The function calcBitcoinValue is executed as a callback in function dollarConvert
-// Thus, executing the code: dollarConvert(dollarValue, currentPrice, calcBitcoinValue); 
-// Would yield the same results as above
-//
-// var calcBitcoinValue = function(dollarValue, currentPrice) {
-//   return bitcoinValue = (dollarValue/currentPrice).toFixed(8);
-// };
-//
-// var dollarConvert = function(dollarValue, currentPrice, callback) {
-//   if (currency==="Euro"){
-//   callback(dollarValue, currentPrice);
-//   $("p3").empty().append("<small style=color:gray>€" + dollarValue + "</small>" + " = " + "B⃦" + bitcoinValue);
-//   }
-  
-//   else if (currency==="Złoty"){
-//   callback(dollarValue, currentPrice);
-//   $("p3").empty().append("<small style=color:gray>" + dollarValue + "zł</small>" + " = " + "B⃦" + bitcoinValue);
-//   }
-
-//   else {
-//   callback(dollarValue,currentPrice);
-//   $("p3").empty().append("<small style=color:gray>$" + dollarValue + "</small>" + " = " + "B⃦" + bitcoinValue);
-//   }
-// };
-
-
 // Converts bitcoins to currency
 // The result from calcDollarValue is stored in dollarValue
 // Appends the converted value and the appropriate curreny symbol using jQuery
@@ -172,29 +134,29 @@ var btcConvert = function(bitcoinValue, currentPrice) {
 
 $(document).ready(function()
    {
-      // bitcoinDisplay is passed as the callback function in getCurrentPrice
+    // bitcoinDisplay is passed as the callback function in getCurrentPrice
+    getCurrentPrice(bitcoinDisplay);
+
+    // Stores user input values (either $ or BTC)
+    $("button").click(function() {
+      var dollarValue = 0, bitcoinValue = 0;
+
+      dollarValue = $("#dollarInput").val();
+      bitcoinValue = $("#btcInput").val();
+
+      if (dollarValue>0){
+        dollarConvert(dollarValue, currentPrice);
+        $("#dollarInput").val("");
+      }
+      else if (bitcoinValue>0){
+        btcConvert(bitcoinValue, currentPrice);
+        $("#btcInput").val("");
+      }
+    });
+
+    $("#dd-menu a").click(function(){
+      currency = $(this).text();
+      $(".tagged").empty();
       getCurrentPrice(bitcoinDisplay);
-
-      // Stores user input values (either $ or BTC)
-      $("button").click(function() {
-        var dollarValue = 0, bitcoinValue = 0;
-
-        dollarValue = $("#dollarInput").val();
-        bitcoinValue = $("#btcInput").val();
-
-        if (dollarValue>0){
-          dollarConvert(dollarValue, currentPrice);
-          $("#dollarInput").val("");
-        }
-        else if (bitcoinValue>0){
-          btcConvert(bitcoinValue, currentPrice);
-          $("#btcInput").val("");
-        }
-      });
-
-      $("#dd-menu a").click(function(){
-        currency = $(this).text();
-        $(".tagged").empty();
-        getCurrentPrice(bitcoinDisplay);
-      });
-});
+    });
+  });
